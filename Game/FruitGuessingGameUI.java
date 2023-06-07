@@ -1,6 +1,5 @@
 package Game;
 
-
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -12,16 +11,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-public class FruitGuessingGameUI extends JFrame implements Serializable{
-	private static final long serialVersionUID = 1L;
+public class FruitGuessingGameUI extends JFrame implements Serializable {
+    private static final long serialVersionUID = 1L;
     private FruitGuessingGame game;
     private JLabel clueLabel;
     private JTextField guessField;
     private JLabel resultLabel;
     private JButton guessButton;
     private JLabel pointsLabel;
+    private JButton playAgainButton;
 
     public FruitGuessingGameUI() {
         super("Fruit Guessing Game");
@@ -38,8 +39,17 @@ public class FruitGuessingGameUI extends JFrame implements Serializable{
         guessButton = new JButton("Guess");
         guessButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                final String guess = guessField.getText().trim(); // Create final copy of guess variable
+                final String guess = guessField.getText().trim();
                 processGuess(guess);
+                guessField.setText(""); // Clear the guessField after pressing the guessButton
+            }
+        });
+
+        playAgainButton = new JButton("Play Again");
+        playAgainButton.setEnabled(false);
+        playAgainButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                startNewGame();
             }
         });
 
@@ -51,6 +61,7 @@ public class FruitGuessingGameUI extends JFrame implements Serializable{
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(guessButton);
+        buttonPanel.add(playAgainButton);
 
         JPanel pointsPanel = new JPanel();
         pointsPanel.add(pointsLabel);
@@ -76,7 +87,6 @@ public class FruitGuessingGameUI extends JFrame implements Serializable{
             return;
         }
 
-        // Create and execute a SwingWorker to run the game logic in the background
         SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
@@ -87,16 +97,18 @@ public class FruitGuessingGameUI extends JFrame implements Serializable{
             @Override
             protected void done() {
                 try {
-                    // Update the UI with the game result
                     resultLabel.setText(game.getGuessResult());
 
                     if (game.isGameOver()) {
-                        clueLabel.setText("Game over!");
-                        guessButton.setEnabled(false);
-                        game.resetGame(); // Reset the game for a new round
+                        if (game.getRemainingGuesses() <= 0) {
+                            clueLabel.setText("Game over!");
+                            guessButton.setEnabled(false);
+                            playAgainButton.setEnabled(true);
+                        } else {
+                            clueLabel.setText("Incorrect guess. Remaining guesses: " + game.getRemainingGuesses());
+                        }
                     } else {
                         clueLabel.setText("Guess the fruit:");
-                        guessField.setText("");
                     }
 
                     updatePointsLabel();
@@ -106,17 +118,35 @@ public class FruitGuessingGameUI extends JFrame implements Serializable{
             }
         };
 
-        // Execute the SwingWorker
         worker.execute();
     }
+
 
     private void updatePointsLabel() {
         int points = game.getScore();
         pointsLabel.setText("Points: " + points);
     }
 
+    private void startNewGame() {
+        game.resetGame();
+        guessButton.setEnabled(true);
+        playAgainButton.setEnabled(false);
+        remove(playAgainButton);
+        add(guessButton, BorderLayout.SOUTH);
+        resultLabel.setText("");
+        clueLabel.setText("Guess the fruit:");
+        guessField.setText("");
+        updatePointsLabel();
+        revalidate();
+        repaint();
+    }
+
     public static void main(String[] args) {
-        FruitGuessingGameUI gameUI = new FruitGuessingGameUI();
-        gameUI.startGame();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                FruitGuessingGameUI gameUI = new FruitGuessingGameUI();
+                gameUI.startGame();
+            }
+        });
     }
 }

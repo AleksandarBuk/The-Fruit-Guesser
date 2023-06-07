@@ -1,17 +1,13 @@
 package Game;
 
-import java.util.Scanner;
-
 public class FruitGuessingGame {
     private FruitGenerator fruitGenerator;
-    private Scanner scanner;
     private int score;
     private int incorrectGuesses;
     private String guessResult;
 
     public FruitGuessingGame() {
         this.fruitGenerator = new FruitGenerator();
-        this.scanner = new Scanner(System.in);
         this.score = 0;
         this.incorrectGuesses = 0;
         this.guessResult = "";
@@ -22,41 +18,23 @@ public class FruitGuessingGame {
         String fruit = fruitGenerator.generateRandomFruit();
 
         if (guess.equalsIgnoreCase(fruit)) {
-            System.out.println("Congratulations! You guessed it right.");
+            guessResult = "Congratulations! You guessed it right.";
             incrementPoints(); // Increment points
             incorrectGuesses = 0; // Reset consecutive incorrect guesses
-            guessResult = "Congratulations! You guessed it right.";
             return; // Exit the method after a correct guess
         }
 
         incorrectGuesses++;
         remainingGuesses--; // Decrement the remaining allowed guesses
 
-        while (remainingGuesses > 0) {
-            System.out.println("Incorrect guess. Remaining guesses: " + remainingGuesses);
-            System.out.println("Guess the fruit, please:");
-            guess = scanner.nextLine().trim();
-
-            if (guess.equalsIgnoreCase(fruit)) {
-                System.out.println("Congratulations! You guessed it right.");
-                incrementPoints(); // Increment points
-                incorrectGuesses = 0; // Reset consecutive incorrect guesses
-                guessResult = "Congratulations! You guessed it right.";
-                return; // Exit the method after a correct guess
-            }
-
-            incorrectGuesses++;
-            remainingGuesses--; // Decrement the remaining allowed guesses
+        if (incorrectGuesses >= 3) {
+            guessResult = "Game over! Your score: " + score;
+            return; // Exit the method if the game is over
         }
 
-        System.out.println("Game over!");
-        System.out.println("Your score: " + score);
-        scanner.close();
-        guessResult = "Game over! Your score: " + score;
+        guessResult = "Incorrect guess. Remaining guesses: " + remainingGuesses;
     }
-    
-   
- 
+
     public void resetGame() {
         score = 0;
         incorrectGuesses = 0;
@@ -73,6 +51,10 @@ public class FruitGuessingGame {
 
     public String getGuessResult() {
         return guessResult;
+    }
+
+    public int getRemainingGuesses() {
+        return 3 - incorrectGuesses;
     }
 
     public boolean isGameOver() {
