@@ -1,5 +1,6 @@
 package Game;
 
+import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -23,10 +24,13 @@ public class FruitGuessingGameUI extends JFrame implements Serializable {
     private JButton guessButton;
     private JLabel pointsLabel;
     private JButton playAgainButton;
+    private JLabel statisticsLabel;
+    private GameStatistics gameStatistics;
 
     public FruitGuessingGameUI() {
         super("Fruit Guessing Game");
         game = new FruitGuessingGame();
+        gameStatistics = new GameStatistics();
 
         clueLabel = new JLabel();
         clueLabel.setFont(new Font("Arial", Font.PLAIN, 16));
@@ -35,6 +39,10 @@ public class FruitGuessingGameUI extends JFrame implements Serializable {
 
         resultLabel = new JLabel();
         resultLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        
+        
+        statisticsLabel = new JLabel();
+        statisticsLabel.setFont(new Font("Arial", Font.PLAIN, 16));
 
         guessButton = new JButton("Guess");
         guessButton.addActionListener(new ActionListener() {
@@ -52,7 +60,26 @@ public class FruitGuessingGameUI extends JFrame implements Serializable {
                 startNewGame();
             }
         });
+        
+        Dimension windowSize = new Dimension(400,400);
+        setPreferredSize(windowSize);
+        
+        setResizable(false); // Set the Resizable property to false
 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        pack();
+        setLocationRelativeTo(null);
+        
+        JPanel statisticsPanel = new JPanel();
+        statisticsPanel.add(statisticsLabel);
+
+//        setLayout(new BorderLayout());
+//        add(mainPanel, BorderLayout.CENTER);
+//        add(buttonPanel, BorderLayout.SOUTH);
+//        add(pointsPanel, BorderLayout.NORTH);
+//        add(statisticsPanel, BorderLayout.WEST); // Add the statistics panel to the left side
+
+        
         pointsLabel = new JLabel("Points: 0");
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(clueLabel, BorderLayout.NORTH);
@@ -70,6 +97,7 @@ public class FruitGuessingGameUI extends JFrame implements Serializable {
         add(mainPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
         add(pointsPanel, BorderLayout.NORTH);
+        add(statisticsPanel, BorderLayout.WEST);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
@@ -120,7 +148,14 @@ public class FruitGuessingGameUI extends JFrame implements Serializable {
 
         worker.execute();
     }
-
+    
+    private void updateStatisticsLabel() {
+        int gamesPlayed = gameStatistics.getTotalGames();
+        int gamesWon = gameStatistics.getTotalWins();
+        int gamesLost = gameStatistics.getTotalLosses();
+        String statisticsText = "Games played: " + gamesPlayed + " | Games won: " + gamesWon + " | Games lost: " + gamesLost;
+        statisticsLabel.setText(statisticsText);
+    }
 
     private void updatePointsLabel() {
         int points = game.getScore();

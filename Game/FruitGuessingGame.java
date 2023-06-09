@@ -5,12 +5,14 @@ public class FruitGuessingGame {
     private int score;
     private int incorrectGuesses;
     private String guessResult;
+    private GameStatistics gameStatistics;
 
     public FruitGuessingGame() {
         this.fruitGenerator = new FruitGenerator();
         this.score = 0;
         this.incorrectGuesses = 0;
         this.guessResult = "";
+        this.gameStatistics = new GameStatistics();
     }
 
     public void playGuess(String guess) {
@@ -21,14 +23,17 @@ public class FruitGuessingGame {
             guessResult = "Congratulations! You guessed it right.";
             incrementPoints(); // Increment points
             incorrectGuesses = 0; // Reset consecutive incorrect guesses
+            gameStatistics.updateStatistics(true, score);
             return; // Exit the method after a correct guess
         }
 
         incorrectGuesses++;
         remainingGuesses--; // Decrement the remaining allowed guesses
+        gameStatistics.updateStatistics(false, score);
 
         if (incorrectGuesses >= 3) {
-            guessResult = "Game over! Your score: " + score;
+            guessResult = ("Game over! ");
+            System.out.println("Your score: " + score);
             return; // Exit the method if the game is over
         }
 
@@ -39,6 +44,7 @@ public class FruitGuessingGame {
         score = 0;
         incorrectGuesses = 0;
         guessResult = "";
+        gameStatistics.resetStatistics();
     }
 
     public int getScore() {
