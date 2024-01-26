@@ -2,9 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayList;  // Import ArrayList
-import java.util.Map;
 
 public class FruitExplorer {
     private JFrame frame;
@@ -14,6 +13,7 @@ public class FruitExplorer {
     private JTextField guessField;
     private JButton guessButton;
     private JTextArea messageArea;
+    private JButton playButton; // Add a Play Game button
 
     private FruitDictionary fruitDictionary;
     private String currentFruit;
@@ -23,34 +23,64 @@ public class FruitExplorer {
     public FruitExplorer() {
         frame = new JFrame("Fruit Explorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false); // turn resizeable off
-        frame.setSize(800, 600); // app window size
-        frame.setLocationRelativeTo(null); // sets app window to the center of the screen
+        frame.setResizable(false);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
 
         mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(6, 2));
+        mainPanel.setLayout(new BorderLayout()); // Use BorderLayout for the main panel
+
+        JPanel topPanel = new JPanel(); // Create a top panel for labels and clues
+        topPanel.setLayout(new GridLayout(6, 2));
 
         clueLabel = new JLabel("Clue: ");
-        mainPanel.add(clueLabel);
+        topPanel.add(clueLabel);
 
         scoreboardLabel = new JLabel("Score: " + score);
-        mainPanel.add(scoreboardLabel);
+        topPanel.add(scoreboardLabel);
 
         guessField = new JTextField();
-        mainPanel.add(guessField);
+        topPanel.add(guessField);
 
         guessButton = new JButton("Guess");
-        mainPanel.add(guessButton);
+        topPanel.add(guessButton);
+
+        // Create and configure the Play Game button
+        playButton = new JButton("Play Game");
+        playButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                startNewGame();
+            }
+        });
+        topPanel.add(playButton); // Add the Play Game button
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
 
         messageArea = new JTextArea();
         messageArea.setEditable(false);
-        mainPanel.add(new JScrollPane(messageArea));
 
-        frame.add(mainPanel, BorderLayout.NORTH);
+        // Create a panel for the message area and guess button
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+
+        // Add the guessButton to the SOUTH position
+        bottomPanel.add(guessButton, BorderLayout.SOUTH);
+        
+        // Add the messageArea to the CENTER position
+        bottomPanel.add(new JScrollPane(messageArea), BorderLayout.LINE_END);
+
+        // Add the bottomPanel to the mainPanel
+        mainPanel.add(bottomPanel, BorderLayout.CENTER);
+
+        frame.add(mainPanel);
         frame.setVisible(true);
 
         fruitDictionary = new FruitDictionary();
+    }
+
+    private void startNewGame() {
         initializeGame();
+        playButton.setEnabled(false); // Disable the Play Game button after starting the game
     }
 
     private void initializeGame() {
@@ -69,7 +99,7 @@ public class FruitExplorer {
     }
 
     private String getRandomFruit() {
-        List<String> fruitNames = new ArrayList<>(fruitDictionary.getFruitNames());  // Use getFruitNames method
+        List<String> fruitNames = new ArrayList<>(fruitDictionary.getFruitNames());
         int randomIndex = (int) (Math.random() * fruitNames.size());
         return fruitNames.get(randomIndex);
     }
@@ -112,3 +142,6 @@ public class FruitExplorer {
         });
     }
 }
+
+// add the fruit guessing limit 5 fruits max
+// make sure to organize gui better
