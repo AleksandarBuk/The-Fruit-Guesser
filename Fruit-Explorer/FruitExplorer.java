@@ -144,4 +144,6 @@ public class FruitExplorer {
 }
 
 // add the fruit guessing limit 5 fruits max
-// make sure to organize gui better
+// make sure to organize elements better
+// make sure to add 20 fruits and improve their clues in educational purposes 
+// organize clues from hardest to easiest
