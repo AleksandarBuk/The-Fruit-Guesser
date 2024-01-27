@@ -3,7 +3,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class FruitExplorer {
     private JFrame frame;
@@ -19,6 +21,10 @@ public class FruitExplorer {
     private String currentFruit;
     private int currentClueIndex;
     private int score;
+    private int fruitsGuessed;
+    private static final int MAX_GUESSES = 5;
+
+    private Set<String> guessedFruits = new HashSet<>(); // Declare at class level
 
     public FruitExplorer() {
         frame = new JFrame("Fruit Explorer");
@@ -39,7 +45,9 @@ public class FruitExplorer {
         scoreboardLabel = new JLabel("Score: " + score);
         topPanel.add(scoreboardLabel);
 
+        // guess input
         guessField = new JTextField();
+        guessField.setColumns(20);
         topPanel.add(guessField);
 
         guessButton = new JButton("Guess");
@@ -65,9 +73,9 @@ public class FruitExplorer {
 
         // Add the guessButton to the SOUTH position
         bottomPanel.add(guessButton, BorderLayout.SOUTH);
-        
+
         // Add the messageArea to the CENTER position
-        bottomPanel.add(new JScrollPane(messageArea), BorderLayout.LINE_END);
+        bottomPanel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
 
         // Add the bottomPanel to the mainPanel
         mainPanel.add(bottomPanel, BorderLayout.CENTER);
@@ -79,8 +87,15 @@ public class FruitExplorer {
     }
 
     private void startNewGame() {
-        initializeGame();
-        playButton.setEnabled(false); // Disable the Play Game button after starting the game
+        resetFruits(); // Reset guessed fruits
+        if (fruitsGuessed >= MAX_GUESSES) {
+            messageArea.setText("Game Over! Your Final Score: " + score);
+            guessButton.setEnabled(false); // Disable the Guess button
+            playButton.setEnabled(true); // Enable play button for play again
+        } else {
+            initializeGame();
+            playButton.setEnabled(false); // Disable the Play Game button after starting the game
+        }
     }
 
     private void initializeGame() {
@@ -99,9 +114,23 @@ public class FruitExplorer {
     }
 
     private String getRandomFruit() {
-        List<String> fruitNames = new ArrayList<>(fruitDictionary.getFruitNames());
-        int randomIndex = (int) (Math.random() * fruitNames.size());
-        return fruitNames.get(randomIndex);
+        List<String> availableFruits = new ArrayList<>(fruitDictionary.getFruitNames());
+
+        // Remove already guessed fruits from the availableFruits list
+        availableFruits.removeAll(guessedFruits);
+
+        if (availableFruits.isEmpty()) {
+            // If all fruits have been guessed, return a message or handle it as needed
+            return "All fruits guessed";
+        }
+
+        int randomIndex = (int) (Math.random() * availableFruits.size());
+        String randomFruit = availableFruits.get(randomIndex);
+
+        // Add the randomly selected fruit to the guessedFruits set
+        guessedFruits.add(randomFruit);
+
+        return randomFruit;
     }
 
     private void updateClue() {
@@ -113,6 +142,10 @@ public class FruitExplorer {
         }
     }
 
+    private void resetFruits() {
+        guessedFruits.clear();
+    }
+
     private void updateScoreboard() {
         scoreboardLabel.setText("Score: " + score);
     }
@@ -121,12 +154,21 @@ public class FruitExplorer {
         String userGuess = guessField.getText();
         if (userGuess.equalsIgnoreCase(currentFruit)) {
             score += 10; // Increase score for correct guess
-            messageArea.setText("Correct! You guessed '" + currentFruit + "'.");
-            currentFruit = getRandomFruit();
-            currentClueIndex = 0;
-            updateClue();
-            updateScoreboard();
-            guessField.setText("");
+            fruitsGuessed++; // Increment the number of guessed fruits
+            messageArea.setText("Correct! You guessed '" + currentFruit + "'.\n");
+
+            // Check if the maximum number of guesses has been reached
+            if (fruitsGuessed >= MAX_GUESSES) {
+                messageArea.append("You've completed the first round.\n Do you want to play again?");
+                guessButton.setEnabled(false); // Disable the Guess button
+                playButton.setEnabled(true); // Enable play button for play again
+            } else {
+                currentFruit = getRandomFruit();
+                currentClueIndex = 0;
+                updateClue();
+                updateScoreboard();
+                guessField.setText("");
+            }
         } else {
             messageArea.setText("Incorrect guess. Try again.");
             currentClueIndex++;
@@ -142,8 +184,3 @@ public class FruitExplorer {
         });
     }
 }
-
-// add the fruit guessing limit 5 fruits max
-// make sure to organize elements better
-// make sure to add 20 fruits and improve their clues in educational purposes 
-// organize clues from hardest to easiest
