@@ -1,0 +1,4 @@
+Alright. Prfect place to pause the development for now.
+
+In this session i've implemented some improvements. I've made adjustments on how the game is going ot behave when certain triggers envoked.
+

@@ -13,6 +13,7 @@ public class FruitExplorer {
     private JLabel clueLabel;
     private JLabel scoreboardLabel;
     private JTextField guessField;
+    private JTextArea ScoreField;
     private JButton guessButton;
     private JTextArea messageArea;
     private JButton playButton; // Add a Play Game button
@@ -49,15 +50,23 @@ public class FruitExplorer {
         guessField = new JTextField();
         guessField.setColumns(20);
         topPanel.add(guessField);
+        
+        ScoreField = new JTextArea();
+        ScoreField.setColumns(20);
+        ScoreField.setVisible(false); // Initially, the ScoreField is invisible
+        ScoreField.setEditable(false); // Make the ScoreField not editable
+        topPanel.add(ScoreField);
 
-        guessButton = new JButton("Guess");
-        topPanel.add(guessButton);
 
         // Create and configure the Play Game button
         playButton = new JButton("Play Game");
+        playButton.setPreferredSize(new Dimension(150, 40)); // Set preferred size
         playButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 startNewGame();
+                guessField.setVisible(true); // Show the input field
+                messageArea.setVisible(true);
+                ScoreField.setVisible(false); // Hide the ScoreField
             }
         });
         topPanel.add(playButton); // Add the Play Game button
@@ -65,25 +74,50 @@ public class FruitExplorer {
         mainPanel.add(topPanel, BorderLayout.NORTH);
 
         messageArea = new JTextArea();
+        messageArea.setColumns(20);
         messageArea.setEditable(false);
 
         // Create a panel for the message area and guess button
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.setLayout(new BorderLayout()); // Use BorderLayout
 
-        // Add the guessButton to the SOUTH position
-        bottomPanel.add(guessButton, BorderLayout.SOUTH);
+        // Create a JScrollPane for the messageArea
+        JScrollPane scrollPane = new JScrollPane(messageArea);
 
-        // Add the messageArea to the CENTER position
-        bottomPanel.add(new JScrollPane(messageArea), BorderLayout.CENTER);
+        // Set alignment for messageArea
+        messageArea.setAlignmentX(Component.CENTER_ALIGNMENT); // Horizontal alignment
+        messageArea.setAlignmentY(Component.TOP_ALIGNMENT);    // Vertical alignment (top)
+
+        // Reduce the preferred height of the JScrollPane by half
+        Dimension scrollPaneSize = scrollPane.getPreferredSize();
+        scrollPaneSize.height = 100; // Set the height to 100 pixels
+        scrollPane.setPreferredSize(scrollPaneSize);
+
+        // Add the JScrollPane as the center component
+        bottomPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Create a panel for the guess button
+        JPanel guessButtonPanel = new JPanel();
+        guessButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+
+        // Create the "Guess" button and set its preferred size
+        guessButton = new JButton("Guess");
+        guessButton.setPreferredSize(new Dimension(100, 40)); // Set preferred size
+        guessButtonPanel.add(guessButton);
+
+        // Add the guessButtonPanel to the bottomPanel's SOUTH position
+        bottomPanel.add(guessButtonPanel, BorderLayout.SOUTH);
 
         // Add the bottomPanel to the mainPanel
         mainPanel.add(bottomPanel, BorderLayout.CENTER);
-
         frame.add(mainPanel);
         frame.setVisible(true);
 
+        // Initialize the Fruit Dictionary
         fruitDictionary = new FruitDictionary();
+
+        // Disable guessButton initially
+        guessButton.setEnabled(false);
     }
 
     private void startNewGame() {
@@ -92,11 +126,16 @@ public class FruitExplorer {
             messageArea.setText("Game Over! Your Final Score: " + score);
             guessButton.setEnabled(false); // Disable the Guess button
             playButton.setEnabled(true); // Enable play button for play again
+            ScoreField.setVisible(true); // Show the ScoreField
+            ScoreField.setText("Final Score: " + score); // Display final score in ScoreField
         } else {
             initializeGame();
+            guessButton.setEnabled(true); // Enable the Guess button after starting the game
             playButton.setEnabled(false); // Disable the Play Game button after starting the game
+            messageArea.setText(""); // Clear the messageArea
         }
     }
+
 
     private void initializeGame() {
         currentFruit = getRandomFruit();
@@ -144,6 +183,7 @@ public class FruitExplorer {
 
     private void resetFruits() {
         guessedFruits.clear();
+        fruitsGuessed = 0;
     }
 
     private void updateScoreboard() {
@@ -156,12 +196,16 @@ public class FruitExplorer {
             score += 10; // Increase score for correct guess
             fruitsGuessed++; // Increment the number of guessed fruits
             messageArea.setText("Correct! You guessed '" + currentFruit + "'.\n");
-
-            // Check if the maximum number of guesses has been reached
+            
+            // Hide the input field when the maximum number of guesses is reached
             if (fruitsGuessed >= MAX_GUESSES) {
                 messageArea.append("You've completed the first round.\n Do you want to play again?");
                 guessButton.setEnabled(false); // Disable the Guess button
                 playButton.setEnabled(true); // Enable play button for play again
+                guessField.setVisible(false); // Hide the input field
+                messageArea.setVisible(false);
+                ScoreField.setVisible(true);
+                ScoreField.setText("Final Score: " + score); // Display final score in ScoreField
             } else {
                 currentFruit = getRandomFruit();
                 currentClueIndex = 0;
@@ -174,6 +218,8 @@ public class FruitExplorer {
             currentClueIndex++;
             updateClue();
         }
+        guessField.setText(""); // Clear the text in the input field
+
     }
 
     public static void main(String[] args) {
