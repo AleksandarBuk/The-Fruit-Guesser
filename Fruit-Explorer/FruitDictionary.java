@@ -12,9 +12,9 @@ public class FruitDictionary {
     }
 
     private void initializeDictionary() {
-        addFruitWithClues("Apple", "Red and Round", "Juicy and Sweet", "Healthy and Nutritious", "Tree with Leaves", "Delicious to Eat");
-        addFruitWithClues("Banana", "Yellow and Curved", "Sweet and Tasty", "Peel Before Eating", "Tropical Fruit", "Healthy and Energizing");
-        addFruitWithClues("Pear", "Green and Pear-shaped", "Sweet and Juicy", "Grows on a Tree", "Not Found in Tropics", "Crunchy and Refreshing");
+        addFruitWithClues("Apple", "What fruit is Red and Round?", "It's liked because it's Juicy and Sweet", "It's know how Healthy and Nutritious it is", "It grows on a Tree with Leaves", "It can be used for a pie.");
+        addFruitWithClues("Banana", "Yellow and Curved", "Healthy and Energizing", "Sweet and Tasty", "It's a Tropical Fruit", "Peel Before Eating", "This fruit is Yellow and Curved");
+        addFruitWithClues("Pear", "This fruit is Green and Pear-shaped", "This fruit is Sweet and Juicy", "Not Found in Tropics", "It Grows on a Tree", "It's very Crunchy and Refreshing");
         addFruitWithClues("Orange", "Orange and Citrusy", "Round and Spherical", "Peel to Reveal", "Rich in Vitamin C", "Fresh and Tangy");
         addFruitWithClues("Strawberry", "Red and Heart-shaped", "Juicy and Flavorful", "Small Red Seeds", "Sweet and Fragrant", "Perfect for Desserts");
         addFruitWithClues("Grape", "Purple or Green", "Small and Round", "Grows in Clusters", "Sweet and Juicy", "Used for Wine Too");

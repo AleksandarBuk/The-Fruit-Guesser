@@ -23,6 +23,7 @@ public class FruitExplorer {
     private int currentClueIndex;
     private int score;
     private int fruitsGuessed;
+    private int guesses;
     private static final int MAX_GUESSES = 5;
 
     private Set<String> guessedFruits = new HashSet<>(); // Declare at class level
@@ -60,7 +61,8 @@ public class FruitExplorer {
 
         // Create and configure the Play Game button
         playButton = new JButton("Play Game");
-        playButton.setPreferredSize(new Dimension(150, 40)); // Set preferred size
+        playButton.setPreferredSize(new Dimension(100, 40)); // Set preferred size
+        
         playButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 startNewGame();
@@ -69,12 +71,11 @@ public class FruitExplorer {
                 ScoreField.setVisible(false); // Hide the ScoreField
             }
         });
-        topPanel.add(playButton); // Add the Play Game button
 
-        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(topPanel, BorderLayout.SOUTH);
 
         messageArea = new JTextArea();
-        messageArea.setColumns(20);
+        messageArea.setColumns(30);
         messageArea.setEditable(false);
 
         // Create a panel for the message area and guess button
@@ -104,6 +105,7 @@ public class FruitExplorer {
         guessButton = new JButton("Guess");
         guessButton.setPreferredSize(new Dimension(100, 40)); // Set preferred size
         guessButtonPanel.add(guessButton);
+        guessButtonPanel.add(playButton); // Add the Play Game button
 
         // Add the guessButtonPanel to the bottomPanel's SOUTH position
         bottomPanel.add(guessButtonPanel, BorderLayout.SOUTH);
@@ -193,11 +195,11 @@ public class FruitExplorer {
     private void checkGuess() {
         String userGuess = guessField.getText();
         if (userGuess.equalsIgnoreCase(currentFruit)) {
-            score += 10; // Increase score for correct guess
+            int points = 10 - guesses; // Calculate points based on number of clues taken
+            score += points; // Increase score based on points calculated
             fruitsGuessed++; // Increment the number of guessed fruits
             messageArea.setText("Correct! You guessed '" + currentFruit + "'.\n");
-            
-            // Hide the input field when the maximum number of guesses is reached
+
             if (fruitsGuessed >= MAX_GUESSES) {
                 messageArea.append("You've completed the first round.\n Do you want to play again?");
                 guessButton.setEnabled(false); // Disable the Guess button
@@ -205,7 +207,10 @@ public class FruitExplorer {
                 guessField.setVisible(false); // Hide the input field
                 messageArea.setVisible(false);
                 ScoreField.setVisible(true);
+                updateScoreboard();
+
                 ScoreField.setText("Final Score: " + score); // Display final score in ScoreField
+                guesses = 0;
             } else {
                 currentFruit = getRandomFruit();
                 currentClueIndex = 0;
@@ -216,11 +221,13 @@ public class FruitExplorer {
         } else {
             messageArea.setText("Incorrect guess. Try again.");
             currentClueIndex++;
+            guesses++;
             updateClue();
         }
         guessField.setText(""); // Clear the text in the input field
-
     }
+
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
