@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -9,230 +8,213 @@ import java.util.Set;
 
 public class FruitExplorer {
     private JFrame frame;
+    private JLabel clueLabel, scoreboardLabel;
     private JPanel mainPanel;
-    private JLabel clueLabel;
-    private JLabel scoreboardLabel;
     private JTextField guessField;
-    private JTextArea ScoreField;
-    private JButton guessButton;
-    private JTextArea messageArea;
-    private JButton playButton; // Add a Play Game button
+    private JTextArea scoreField, messageArea;
+    private JButton guessButton, playButton;
 
     private FruitDictionary fruitDictionary;
     private String currentFruit;
-    private int currentClueIndex;
-    private int score;
-    private int fruitsGuessed;
-    private static final int MAX_ = 5;
+    private int currentClueIndex, score, fruitsGuessed;
+    private Set<String> guessedFruits = new HashSet<>();
+    private static final int MAX_GUESSES = 5;
+    private int currentGuessCount;
 
-    private Set<String> guessedFruits = new HashSet<>(); // Declare at class level
-
+    
     public FruitExplorer() {
+        initializeUI();
+        fruitDictionary = new FruitDictionary();
+    }
+
+    private void initializeUI() { // inicijalizacija interfejsa
         frame = new JFrame("Fruit Explorer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setSize(800, 600);
+        frame.setSize(1000, 500);
         frame.setLocationRelativeTo(null);
 
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout()); // Use BorderLayout for the main panel
-
-        JPanel topPanel = new JPanel(); // Create a top panel for labels and clues
-        topPanel.setLayout(new GridLayout(6, 2));
-
-        clueLabel = new JLabel("Clue: ");
-        topPanel.add(clueLabel);
-
-        scoreboardLabel = new JLabel("Score: " + score);
-        topPanel.add(scoreboardLabel);
-
-        // guess input
-        guessField = new JTextField();
-        guessField.setColumns(20);
-        topPanel.add(guessField);
-        
-        ScoreField = new JTextArea();
-        ScoreField.setColumns(20);
-        ScoreField.setVisible(false); // Initially, the ScoreField is invisible
-        ScoreField.setEditable(false); // Make the ScoreField not editable
-        topPanel.add(ScoreField);
-
-
-        // Create and configure the Play Game button
-        playButton = new JButton("Play Game");
-        playButton.setPreferredSize(new Dimension(100, 40)); // Set preferred size
-        
-        playButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                startNewGame();
-                currentClueIndex = 0;
-                guessField.setVisible(true); // Show the input field
-                messageArea.setVisible(true);
-                ScoreField.setVisible(false); // Hide the ScoreField
-            }
-        });
-
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-
-        messageArea = new JTextArea();
-        messageArea.setColumns(30);
-        messageArea.setEditable(false);
-
-        // Create a panel for the message area and guess button
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout(new BorderLayout()); // Use BorderLayout
-
-        // Create a JScrollPane for the messageArea
-        JScrollPane scrollPane = new JScrollPane(messageArea);
-
-        // Set alignment for messageArea
-        messageArea.setAlignmentX(Component.CENTER_ALIGNMENT); // Horizontal alignment
-        messageArea.setAlignmentY(Component.TOP_ALIGNMENT);    // Vertical alignment (top)
-
-        // Reduce the preferred height of the JScrollPane by half
-        Dimension scrollPaneSize = scrollPane.getPreferredSize();
-        scrollPaneSize.height = 100; // Set the height to 100 pixels
-        scrollPane.setPreferredSize(scrollPaneSize);
-
-        // Add the JScrollPane as the center component
-        bottomPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Create a panel for the guess button
-        JPanel guessButtonPanel = new JPanel();
-        guessButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-
-        // Create the "Guess" button and set its preferred size
-        guessButton = new JButton("Guess");
-        guessButton.setPreferredSize(new Dimension(100, 40)); // Set preferred size
-        guessButtonPanel.add(guessButton);
-        guessButtonPanel.add(playButton); // Add the Play Game button
-
-        // Add the guessButtonPanel to the bottomPanel's SOUTH position
-        bottomPanel.add(guessButtonPanel, BorderLayout.SOUTH);
-
-        // Add the bottomPanel to the mainPanel
-        mainPanel.add(bottomPanel, BorderLayout.CENTER);
+        mainPanel = new JPanel(new BorderLayout());
         frame.add(mainPanel);
+
+        createTopPanel();
+        createBottomPanel();
+
         frame.setVisible(true);
-
-        // Initialize the Fruit Dictionary
-        fruitDictionary = new FruitDictionary();
-
-        // Disable guessButton initially
-        guessButton.setEnabled(false);
     }
-
-    private void startNewGame() {
-        resetFruits(); // Reset guessed fruits
-        if (fruitsGuessed >= MAX_) {
-            messageArea.setText("Game Over! Your Final Score: " + score);
-            guessButton.setEnabled(false); // Disable the Guess button
-            playButton.setEnabled(true); // Enable play button for play again
-            ScoreField.setVisible(true); // Show the ScoreField
-            ScoreField.setText("Final Score: " + score); // Display final score in ScoreField
-            currentClueIndex = 0;
-            
-        } else {
-            initializeGame();
-            guessButton.setEnabled(true); // Enable the Guess button after starting the game
-            playButton.setEnabled(false); // Disable the Play Game button after starting the game
-            messageArea.setText(""); // Clear the messageArea
-        }
-    }
-
-
-    private void initializeGame() {
+    
+    private void initializeGame() { // inicijalizacija igre
         currentFruit = getRandomFruit();
-        currentClueIndex = 0;
         updateClue();
-        score = 0;
         updateScoreboard();
         messageArea.setText("");
+        currentGuessCount = 0;
+    }
 
-        guessButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                checkGuess();
-            }
-        });
+    private void createTopPanel() {
+        JPanel topPanel = new JPanel(new BorderLayout());
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+ 
+        clueLabel = new JLabel("Clue: "); // pitanja
+        clueLabel.setFont(new Font("Arial", Font.PLAIN, 24));
+        scoreboardLabel = new JLabel("Score: 0");
+        guessField = new JTextField(20);
+
+        scoreField = new JTextArea(10, 20); // skor
+        scoreField.setVisible(false);
+        scoreField.setEditable(false);
+
+        playButton = new JButton("Play Game"); // play dugme
+        playButton.setPreferredSize(new Dimension(100, 40));
+        playButton.addActionListener(e -> startNewGame());
+
+        guessButton = new JButton("Guess"); // guess dugme
+        guessButton.setPreferredSize(new Dimension(100, 40));
+        guessButton.setEnabled(false);
+        guessButton.addActionListener(e -> checkGuess());
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.add(guessField);
+        inputPanel.add(guessButton);
+
+        topPanel.add(clueLabel, BorderLayout.WEST);
+        topPanel.add(scoreboardLabel, BorderLayout.EAST);
+        topPanel.add(inputPanel, BorderLayout.CENTER);
+        topPanel.add(playButton, BorderLayout.SOUTH);
+    }
+
+    private void createBottomPanel() {
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        mainPanel.add(bottomPanel, BorderLayout.CENTER); // postavljanje pozicje panela u centar
+
+        messageArea = new JTextArea(2, 20); // dimenzije odgovora
+        messageArea.setEditable(true);
+        JScrollPane scrollPane = new JScrollPane(messageArea);
+        bottomPanel.add(scrollPane, BorderLayout.CENTER);
+
+    }
+
+    private void startNewGame() { // zapocni novu igru
+        guessedFruits.clear();
+        fruitDictionary.reset();
+        score = 0;
+        fruitsGuessed = 0;
+        currentClueIndex = 0;
+        toggleGameControls(true);
+        initializeGame();
     }
 
     private String getRandomFruit() {
         List<String> availableFruits = new ArrayList<>(fruitDictionary.getFruitNames());
-
-        // Remove already guessed fruits from the availableFruits list
         availableFruits.removeAll(guessedFruits);
 
         if (availableFruits.isEmpty()) {
-            // If all fruits have been guessed, return a message or handle it as needed
             return "All fruits guessed";
         }
 
         int randomIndex = (int) (Math.random() * availableFruits.size());
         String randomFruit = availableFruits.get(randomIndex);
-
-        // Add the randomly selected fruit to the guessedFruits set
         guessedFruits.add(randomFruit);
-
         return randomFruit;
     }
 
-    private void updateClue() {
+    private void toggleGameControls(boolean isStarting) { // otkriva i sakriva elemente
+        playButton.setEnabled(!isStarting);
+        guessButton.setEnabled(isStarting);
+        guessField.setVisible(isStarting);
+        messageArea.setVisible(isStarting);
+        scoreField.setVisible(!isStarting);
+    }
+
+    private void updateClue() { // Update pitanje
         List<String> clues = fruitDictionary.getCluesForFruit(currentFruit);
-        if (currentClueIndex < clues.size()) {
-            clueLabel.setText("Clue: " + clues.get(currentClueIndex));
-        } else {
-            clueLabel.setText("No more clues available.");
-        }
+        clueLabel.setText(currentClueIndex < clues.size() ? "Clue: " + clues.get(currentClueIndex) : "No more clues available.");
     }
 
-    private void resetFruits() {
-        guessedFruits.clear();
-        fruitsGuessed = 0;
-    }
-
-    private void updateScoreboard() {
+    private void updateScoreboard() { // update scoreboard
         scoreboardLabel.setText("Score: " + score);
     }
 
-    private void checkGuess() {
-        String userGuess = guessField.getText();
+    private void checkGuess() { // proveri odgovor
+        String userGuess = guessField.getText().trim();
+        guessField.setText("");
+        
+        if (currentGuessCount >= MAX_GUESSES - 1) {
+            messageArea.setText("You lost!");
+            playButton.setEnabled(true);
+            guessButton.setEnabled(false);
+            return;
+        }
+        
         if (userGuess.equalsIgnoreCase(currentFruit)) {
-            int points = 10 - currentClueIndex; // Calculate points based on number of clues taken
-            System.out.print("These are current points" + points);
-            score += points; // Increase score based on points calculated
-            fruitsGuessed++; // Increment the number of guessed fruits
-            messageArea.setText("Correct! You guessed '" + currentFruit + "'.\n");
+            handleCorrectGuess();
+        } else {
+            handleIncorrectGuess();
+            currentGuessCount++; // Increment the guess count only on incorrect guesses
+        }
+    }
 
-            if (fruitsGuessed >= MAX_) {
-                guessButton.setEnabled(false); // Disable the Guess button
-                playButton.setEnabled(true); // Enable play button for play again
-                guessField.setVisible(false); // Hide the input field
-                messageArea.setVisible(false);
-                ScoreField.setVisible(true);
-                updateScoreboard();
 
-                ScoreField.setText("Final Score: " + score); // Display final score in ScoreField
-         
+    private void handleIncorrectGuess() { // procesiranje netacnog odgovra
+        List<String> clues = fruitDictionary.getCluesForFruit(currentFruit);
+        if (currentClueIndex < clues.size() - 1) {
+            currentClueIndex++;
+            updateClue();
+        } else {
+            fruitsGuessed++;
+            if (fruitsGuessed >= MAX_GUESSES) { // max_guess = 5 broj maksimalnih pokusaja odgovora
+                endGame();
             } else {
                 currentFruit = getRandomFruit();
                 currentClueIndex = 0;
                 updateClue();
-                updateScoreboard();
-                guessField.setText("");
             }
-        } else {
-            messageArea.setText("Incorrect guess. Try again.");
-            currentClueIndex++;
-            updateClue();
         }
-        guessField.setText(""); // Clear the text in the input field
+        messageArea.setText("Incorrect! Try again.\n");
+        updateScoreboard();
     }
 
+
+    private void handleCorrectGuess() { // procesiranje tacnog odgovora
+        score += 10 - currentClueIndex;
+        fruitsGuessed++;
+        List<String> clues = fruitDictionary.getCluesForFruit(currentFruit);
+        messageArea.setText("Correct! " + currentFruit + ".\n\n" + clues.get(clues.size() - 1));
+
+        if (fruitsGuessed >= MAX_GUESSES) {
+            endGame();
+        } else {
+            currentFruit = getRandomFruit();
+            currentClueIndex = 0;
+            updateClue();
+            updateScoreboard();
+        }
+    }
+
+
+    private void endGame() { // End the game
+        toggleGameControls(false);
+        scoreField.setText("Your final score is: " + score);
+        scoreField.setVisible(true);
+        
+        // Center the score field in the frame
+        scoreField.setAlignmentX(Component.CENTER_ALIGNMENT);
+        scoreField.setAlignmentY(Component.CENTER_ALIGNMENT);
+        scoreField.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // Add some space at the top
+        
+        // Create a new panel to hold the score field
+        JPanel scorePanel = new JPanel(new BorderLayout());
+        scorePanel.add(scoreField, BorderLayout.CENTER);
+        
+        // Add the score panel to the main panel
+        mainPanel.add(scorePanel, BorderLayout.CENTER);
+        
+        // Refresh the layout
+        frame.validate();
+    }
+
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new FruitExplorer();
-            }
-        });
+        SwingUtilities.invokeLater(FruitExplorer::new);
     }
 }
